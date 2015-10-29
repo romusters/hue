@@ -1,14 +1,17 @@
 #http://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
+from phue import Bridge
+import color
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import argparse
+import utils
+import cv2
+import numpy as np
 
-
-def fun():
-    print "test"
-    from phue import Bridge
-    b = Bridge('192.168.11.8')
-    b.connect()
-    b.get_api()
-    b.set_light(1, 'on')
-    b.set_light(1, 'bri', 127)
+def setColor(r,g,b):
+    xy = c.rgbToCIE1931(r,g,b)
+    bridge.set_light(2, 'bri', 254)
+    bridge.set_light(2, 'xy', xy)
 
 
 def centroid_histogram(clt):
@@ -43,28 +46,36 @@ def plot_colors(hist, centroids):
     # return the bar chart
     return bar
 
-if __name__ == "__main__":
-    #fun()
-    from sklearn.cluster import KMeans
-    import matplotlib.pyplot as plt
-    import argparse
-    import utils
-    import cv2
-    import numpy as np
-
-    cam = cv2.VideoCapture(1)   # 0 -> index of camera
+def cluster():
+    cam = cv2.VideoCapture(0)   # 0 -> index of camera
     
     while True:
-        s, img = cam.read()
-
-        image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        s, image = cam.read()
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         image = image.reshape((image.shape[0] * image.shape[1], 3))
         # cluster the pixel intensities
-        clt = KMeans(n_clusters = 5, n_jobs=-1)
+        clt = KMeans(n_clusters = 4, n_jobs=-1)
         clt.fit(image)
 
         hist = centroid_histogram(clt)
-        bar = plot_colors(hist, clt.cluster_centers_)
-        print clt.cluster_centers_[np.argmax(hist)]
+        #bar = plot_colors(hist, clt.cluster_centers_)
+        return clt.cluster_centers_[np.argmax(hist)]
+
+
+if __name__ == "__main__":
+    
+
+    c = color.Converter()
+    bridge = Bridge('192.168.11.8')
+    bridge.connect()
+    bridge.get_api()
+    bridge.set_light(2, 'on', True)
+
+    while True:
+        [b,g,r] = cluster()
+        setColor(r,g,b)
+        print "color set"
+    
        
