@@ -6,7 +6,7 @@ import speech_recognition as sr
 import time
 from phue import Bridge
 
-bridge = Bridge('192.168.11.8')
+bridge = Bridge('192.168.11.2')
 bridge.connect()
 bridge.get_api()
 bridge.set_light(2, 'on', True)
@@ -27,6 +27,8 @@ while True:
             print("Google Speech Recognition thinks you said " + result)
             if result == "lights off":
                 bridge.set_light(2, 'on', False)
+            if result == "lights on":
+                bridge.set_light(2, 'on', True)
 
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
